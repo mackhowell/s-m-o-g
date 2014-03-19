@@ -1,0 +1,410 @@
+		<!DOCTYPE html>
+		<html lang="en">
+			<head>
+				<title>mack-midterm</title>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+				<style>
+					body {
+						font-family: Monospace;
+						/*background-color: #000;*/
+						color: #fff;
+						margin: 0px;
+						overflow: hidden;
+					}
+					#info {
+						color: #fff;
+						position: absolute;
+						top: 10px;
+						width: 100%;
+						text-align: center;
+						z-index: 100;
+						display:block;
+					}
+					#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+				</style>
+			</head>
+
+			<body>
+
+				<script src="/libs/three.min.js"></script>
+				<script src="/libs/OBJLoader.js"></script>
+				<script src="/libs/TrackballControls.js"></script>
+				<script src="/libs/Detector.js"></script>
+				<script src="/libs/stats.min.js"></script>
+				<script src="/libs/dat-gui/build/dat.gui.min.js"></script>
+
+				<script>
+
+					var container, stats;
+
+					var camera, controls, scene, renderer;
+
+					var mouseX = 0, mouseY = 0;
+
+					var windowHalfX = window.innerWidth / 2;
+					var windowHalfY = window.innerHeight / 2;
+
+					var gui;
+
+					// document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+					var clock = new THREE.Clock();
+					
+					//gui
+
+					// var myGui = function() {
+					// 	this.speed = 0.8;
+					// 	this.numPhones = 10;
+					// };
+
+					// window.onload = function() {
+					// 	var text = new myGui();
+					// 	gui = new dat.GUI();
+					// 	gui.add(text, 'speed', -5, 5);
+					// 	gui.add(text, 'numPhones', 1, 100);
+					// };
+
+					// var gui = new dat.GUI({
+					// 	autoPlace: true;
+					// 	gui.add(text, 'eSMOG', -5, 5); // Min and max
+					// });
+
+					// var gui = new dat.GUI({ autoPlace: false });
+
+					// var customContainer = document.getElementById('my-gui-container');
+					// customContainer.appendChild(gui.domElement);
+
+
+					init();
+					animate();
+
+
+					function init() {
+
+						container = document.createElement( 'div' );
+						document.body.appendChild( container );
+
+						camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
+						// camera.position.set( -15, 10, 15 );
+						camera.position.x = 0;
+            			camera.position.y = 0;
+            			camera.position.z = 300;
+
+            			// controls = new THREE.TrackballControls(camera);
+
+						//Orbit control??
+						// controls = new THREE.OrbitControls( camera );
+
+						// var camera = new THREE.PerspectiveCamera(
+    		// 				35,         // Field of view
+    		// 				800 / 640,  // Aspect ratio
+   			// 				.1,         // Near
+    		// 				10000       // Far
+						// 	);
+						// camera.position.set( -15, 10, 15 );
+						// camera.lookAt( scene.position );
+
+						// scene
+
+						scene = new THREE.Scene();
+
+						// lights
+
+						var ambient = new THREE.AmbientLight( 0x444444 ); 
+						scene.add( ambient );
+
+						var directionalLight = new THREE.DirectionalLight( 0xFFCCFF );
+						directionalLight.position.set( 0, 10000, 100 );
+						scene.add( directionalLight );
+
+						// Water Shader
+						// var noiseTexture = new THREE.ImageUtils.loadTexture( '/images/cloud.png' );
+						// noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 
+
+						// var waterTexture = new THREE.ImageUtils.loadTexture( '/images/grandient.png' );
+						// waterTexture.wrapS = waterTexture.wrapT = THREE.RepeatWrapping; 
+
+						// // use "this." to create global object
+						// this.customUniforms2 = {
+						// 	baseTexture:  { type: "t", value: waterTexture },
+						// 	baseSpeed:    { type: "f", value: 1.15 },
+						// 	noiseTexture:   { type: "t", value: noiseTexture },
+						// 	noiseScale:   { type: "f", value: 0.8 },
+						// 	alpha:      { type: "f", value: 0.5 },
+						// 	time:       { type: "f", value: 1.0 }
+						// };
+
+						// // create custom material from the shader code above
+						// //   that is within specially labeled script tags
+						// var customMaterial2 = new THREE.ShaderMaterial({
+						// 	uniforms: customUniforms2,
+						// 	vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+						// 	fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+						// });
+ 
+						// // other material properties
+						// customMaterial2.side = THREE.DoubleSide;
+						// customMaterial2.transparent = true;
+  
+						// // apply the material to a surface
+						// var flatGeometry = new THREE.PlaneGeometry( window.innerWidth/2.2, window.innerHeight/2.2 );
+						// var surface = new THREE.Mesh( flatGeometry, customMaterial2 );
+						// surface.position.set(0,50,-1000);
+						// scene.add( surface ); 
+
+						// // End of Water Shader
+
+						// Loader
+
+						var manager = new THREE.LoadingManager();
+						manager.onProgress = function ( item, loaded, total ) {
+
+							console.log( "LoadingManager: " + item, loaded, total );
+
+						};
+
+						// models
+						// var iphones = new THREE.Object3D();
+						// var ipads = new THREE.Object3D();
+
+						// var loader = new THREE.OBJLoader( manager);
+						// loader.load( '/models/ipad-OBJ.obj', function ( object ) {
+						// 	object.traverse( function ( child ) {
+						// 	});
+						// object.position.x = Math.random() * 50 - 10;
+						// object.position.y = Math.random() * 50 - 10;
+						// object.position.z = Math.random() * 50 - 10;
+						// });
+
+						// var smog = [];   // An array of iphone groups, each object has data for 10 iphones.
+						// var numClusters = 1;
+						var numPhones = 20;
+						var numPhones2 = 40;
+
+						// var objCluster = new THREE.Object3D();
+						var iphones = new THREE.Object3D();
+						var iphones2 = new THREE.Object3D();
+						var pipe = new THREE.Object3D();
+
+						// ALL CLUSTERS - makes multiple instances of iphones
+
+						// for ( var i = 0; i < numClusters; i ++ ) {
+								var loader = new THREE.OBJLoader( manager );
+
+							// EACH CLUSTER - loads in each iphone as child of iphones
+
+							for ( var j = 0; j < numPhones; j ++ ) {
+								loader.load( '/models/iphone-OBJ.js', function ( object ) {
+									
+									object.position.y = Math.random() * 50 - 25;
+									object.position.x = Math.random() * 50 - 25;
+									object.position.z = Math.random() * 50 - 25;
+
+									object.rotation.y = Math.random() * 50 - 25;
+									object.rotation.x = Math.random() * 50 - 25;
+									object.rotation.z = Math.random() * 50 - 25;
+
+									iphones.add( object ); // each iphone is a child of iphones
+									// console.log('S M O G  =  ' + smog);
+									scene.add( iphones );
+
+									// var geometry = object.scene.children[ 0 ].geometry;
+									// var material = object.scene.children[ 0 ].material;
+									// for ( var i = 0; i < 10; i ++ ) {
+									// 	var mesh = new THREE.Mesh( geometry, material );
+									// 	mesh.position.set( i * 100, 0, 0 );
+									// 	scene.add( mesh );
+									// }
+									
+								} );	
+							}
+
+							for ( var k = 0; k < numPhones2; k ++ ) {
+								loader.load( '/models/iphone-OBJ.js', function ( object ) {
+									
+									object.position.y = Math.random() * 100;
+									object.position.x = Math.random() * 100;
+									object.position.z = Math.random() * - 10;
+
+									object.rotation.y = Math.random() * 100;
+									object.rotation.x = Math.random() * 100;
+									object.rotation.z = Math.random() * 100;
+
+									iphones2.add( object ); // each iphone is a child of iphones
+
+									scene.add (iphones2);
+									
+								} );	
+							}
+
+							loader.load( '/models/pipe-OBJ.js', function ( object ) {
+
+								object.position.y = -50;
+								object.position.x = 0;
+								object.position.z = 0;
+
+								object.rotation.y = 0;
+								object.rotation.x = 0;
+								object.rotation.z = 0;
+
+								pipe.add (object);
+								scene.add ( pipe );
+								console.log ('HI FROM PIPE  ' + object);
+
+							});
+
+							// smog.push( iphones );
+							// iphones.clone();
+
+						// }
+
+						// console.log ("NUMBER OF CLUSTERS IN SMOG = " + smog.length);
+
+						// for (var c = 0; c < smog.length; c ++) {
+						// 	var myCluster = smog[c];
+						// 	// myCluster.translateX(0);
+						// 	// myCluster.translateY(20);
+						// 	// myCluster.translateZ(0);
+						// 	// myCluster.position.y = Math.random() * 50;
+						// 	console.log( iphones.id );
+						// 	// console.log("POSITION OF CLUSTER: " + myCluster.position);
+						// 	scene.add(myCluster);
+						// 	scene.updateMatrixWorld();
+						// }
+
+
+						renderer = new THREE.WebGLRenderer();
+						renderer.setSize( window.innerWidth, window.innerHeight );
+						container.appendChild( renderer.domElement );
+
+						document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+						window.addEventListener( 'resize', onWindowResize, false );
+
+					}
+
+					// function update() {
+					// 	delta = clock.getDelta();
+					// 	var moveDistance = 100 * delta;
+					// 	// console.log('MOVE DISTANCE: ' + moveDistance);
+					// 	var newMatrix = iphones.matrix;        
+					// 	newMatrix.identity();
+					// 	//newCubeMatrix.multiplySelf(THREE.Matrix4.rotationYMatrix(cube.rotation.y));
+					// 	newMatrix.multiplySelf(THREE.Matrix4.translationMatrix(iphones.position.x, iphones.position.y, iphones.position.z + moveDistance));
+					// 	iphones.updateMatrix();
+					// }
+
+					function onWindowResize() {
+
+						windowHalfX = window.innerWidth / 2;
+						windowHalfY = window.innerHeight / 2;
+
+						camera.aspect = window.innerWidth / window.innerHeight;
+						camera.updateProjectionMatrix();
+
+						renderer.setSize( window.innerWidth, window.innerHeight );
+
+					}
+
+					function onDocumentMouseMove( event ) {
+						mouseX = ( event.clientX - windowHalfX );
+						mouseY = ( event.clientY - windowHalfY );
+					}
+
+					function animate() {
+
+						requestAnimationFrame( animate );
+						render();
+						// update();
+
+					}
+
+					// function update() {
+					// 	var delta = clock.getDelta();
+					// 	// customUniforms.time.value += delta;
+					// 	customUniforms2.time.value += delta;
+					// }
+
+					function render() {
+
+						camera.position.x += ( mouseX - camera.position.x ) * .01;
+						camera.position.y += ( - mouseY - camera.position.y ) * .01;
+
+						camera.lookAt( scene.position );
+
+						// Original
+						// camera.position.x += ( mouseX - camera.position.x ) * .05;
+						// camera.position.y += ( - mouseY - camera.position.y ) * .05;
+
+
+						// Orthographic camera example
+						// camera.position.x = Math.cos( timer ) * 200;
+						// camera.position.y = Math.sin( timer ) * 200;
+
+						// controls.update();
+
+						camera.lookAt( scene.position );
+
+						renderer.render( scene, camera );
+
+					}
+
+
+
+				// 	function updateForFrame() {  // called by animation support
+    // 				var frameNum = clock.getFrameNumber();
+    // 				var runTime = clock.getElapsedTime();
+    // 				// ... ADD CODE TO UPDATE SCENE FOR THE CURRENT FRAME ...
+    // 				clock.getDelta();
+    // 				var moveDistance = 100 * delta;
+    // 				iphones.translateZ( moveDistance );
+
+    // 				}
+
+				// //------------------ animation support, does not need to be changed ---------
+
+				// 	var clock;  // Keeps track of elapsed time of animation.
+    //         		// clock.getElapsedTime() gives the time, in seconds, that the
+    //        			// animation has been running, not including time when it was
+    //         		// paused.  clock.getFrameNumber() gives the current frame number,
+    //         		// that is, the number of times the scene has been rendered.
+
+				// 	var animating = false;
+
+				// 	function doFrame() {  
+				// 	    if (animating) {
+				// 	        clock.frameNumber++;
+				// 	        updateForFrame();
+				// 	        render();
+				// 	        requestAnimationFrame(doFrame); 
+				// 	    }
+				// 	}
+
+				// 	function startAnimation() {
+				// 	    if (!animating) {
+				// 	        if (!clock) {
+				// 	            clock = new THREE.Clock(false);
+				// 	            clock.frameNumber = 0;
+				// 	            clock.getFrameNumber = function() { return this.frameNumber }
+				// 	        }
+				// 	        clock.start();
+				// 	        animating = true;
+				// 	        requestAnimationFrame(doFrame);
+				// 	    }
+				// 	}
+
+				// 	function pauseAnimation() {
+				// 	    if (animating) {
+				// 	        clock.stop();
+				// 	        animating = false;
+				// 	    }
+				// 	}
+
+
+
+
+				</script>
+
+			</body>
+		</html>
